@@ -25,6 +25,7 @@ class Solution
 public:
     ListNode* mergeKLists(vector<ListNode*>& lists)
     {
+        /*
         if (lists.size() == 1)
         {
             return lists[0];
@@ -38,6 +39,9 @@ public:
             first = tmp;
         }
         return tmp;
+         */
+        return _mergeKLists(lists);
+        
     }
     
     ListNode* mergeTwoList(ListNode* first, ListNode* last)
@@ -94,6 +98,61 @@ public:
         }
         return resultHead;
     }
+    
+    ListNode* _mergeKLists(vector<ListNode*>& lists)
+    {
+        //将list每个元素头部取出来
+        if (lists.empty())
+            return NULL;
+        vector<int> listHeadVal;
+        while (true)
+        {
+            auto it = std::find_if(lists.begin(), lists.end(), [](ListNode* value){return value == NULL;});
+            if (it != lists.end())
+                lists.erase(it);
+            else
+                break;
+        }
+        for (int i = 0; i < lists.size(); ++i)
+        {
+            listHeadVal.push_back(lists[i]->val);
+        }
+        if (listHeadVal.empty())
+            return NULL;
+        
+        ListNode* resultHead = NULL;
+        ListNode* resultList = NULL;
+        while (listHeadVal.size())
+        {
+            auto minPos = std::min_element(listHeadVal.begin(), listHeadVal.end());
+            int index = (int)(minPos - listHeadVal.begin());
+            ListNode* minListHead = lists[index];
+            if (resultList)
+                resultList->next = minListHead;
+            else
+            {
+                resultList = minListHead;
+            }
+            if (minListHead->next)
+            {
+                listHeadVal[index] = minListHead->next->val;
+                minListHead = minListHead->next;
+                lists[index] = minListHead;
+            }
+            else
+            {
+                listHeadVal.erase(minPos);
+                auto listPos = lists.begin() + index;
+                lists.erase(listPos);
+            }
+            if (resultHead)
+                resultList = resultList->next;
+            else
+                resultHead = resultList;
+        }
+        return resultHead;
+    }
+    
 };
 
 void printList(ListNode* list)
@@ -127,9 +186,10 @@ int main(int argc, const char * argv[])
     ListNode* two = bulidLists({4,5,7});
     ListNode* three = bulidLists({8,9,10,12});
     ListNode* four = bulidLists({11,13,20,100});
+    ListNode* five = bulidLists({-10,1,2,33,44});
     
     Solution* pSol = new Solution;
-    vector<ListNode*>lists = {one, two, three, four};
+    vector<ListNode*>lists = {NULL, one};
     ListNode* result = pSol->mergeKLists(lists);
     printList(result);
     delete pSol;
